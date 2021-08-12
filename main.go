@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"fwrouter/fw"
 )
 
 type User struct {
@@ -10,12 +9,12 @@ type User struct {
 }
 
 func main() {
-	r := fw.NewRouter().Prefix("/app-name")
+	r := NewRouter().Prefix("/app-name")
 
 	//r.GET("/user", UserController)
 	//r.POST("/user", CreateUserController)
 
-	r.Routes("/user", func(route *fw.GroupRoutes) {
+	r.Routes("/user", func(route *GroupRoutes) {
 		route.OnGET(UserController)
 		route.OnPOST(CreateUserController)
 	})
@@ -25,40 +24,40 @@ func main() {
 	r.Listen(8000)
 }
 
-func UserController(ctx *fw.Context) {
+func UserController(ctx *Context) {
 	_, _ = ctx.Write("This is users")
 	fmt.Println("API JALAN")
 }
 
-func UserControllerWithId(ctx *fw.Context) {
+func UserControllerWithId(ctx *Context) {
 	_, _ = ctx.Write("ID : " + ctx.Param("id") + " NAME : " + ctx.Param("name"))
 }
 
-func CreateUserController(ctx *fw.Context) {
+func CreateUserController(ctx *Context) {
 	var user User
 	_ = ctx.Body(&user)
 
 	_= ctx.JSON(user)
 }
 
-func AuthMiddleware(handler fw.Handler) fw.Handler {
-	return func(ctx *fw.Context) {
+func AuthMiddleware(handler Handler) Handler {
+	return func(ctx *Context) {
 		fmt.Println("AUTH MIDDLEWARE MULAI")
 		handler(ctx)
 		fmt.Println("AUTH MIDDLEWARE SELESAI")
 	}
 }
 
-func LoggerMiddleware(handler fw.Handler) fw.Handler {
-	return func(ctx *fw.Context) {
+func LoggerMiddleware(handler Handler) Handler {
+	return func(ctx *Context) {
 		fmt.Println("LOGGER MIDDLEWARE MULAI")
 		handler(ctx)
 		fmt.Println("LOGGER MIDDLEWARE SELESAI")
 	}
 }
 
-func CORSMiddleware(handler fw.Handler) fw.Handler {
-	return func(ctx *fw.Context) {
+func CORSMiddleware(handler Handler) Handler {
+	return func(ctx *Context) {
 		fmt.Println("CORS MIDDLEWARE MULAI")
 		handler(ctx)
 		fmt.Println("CORS MIDDLEWARE SELESAI")

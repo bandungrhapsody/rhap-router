@@ -1,4 +1,4 @@
-package fw
+package main
 
 import (
 	"net/http"
