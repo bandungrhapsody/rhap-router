@@ -11,6 +11,10 @@ type GroupRoutes struct {
 
 type MethodSetter func(route *GroupRoutes)
 
+func (gr *GroupRoutes) On(method string, handler Handler) {
+	gr.generateRouteEntry(method, handler)
+}
+
 func (gr *GroupRoutes) OnGET(handler Handler) {
 	gr.generateRouteEntry(http.MethodGet, handler)
 }

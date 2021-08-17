@@ -33,6 +33,18 @@ func (fwc *Context) Header(key string) string {
 	return fwc.writer.Header().Get(key)
 }
 
+func (fwc *Context) ContentType(value string) {
+	fwc.writer.Header().Set("Content-Type", value)
+}
+
+func (fwc *Context) StatusCode(statusCode int) {
+	fwc.writer.WriteHeader(statusCode)
+}
+
+func (fwc *Context) SetHeader(key, value string) {
+	fwc.writer.Header().Set(key, value)
+}
+
 func (fwc *Context) Write(res string) (int, error) {
 	fwc.writer.Header().Set("Content-Type", "text/plain")
 	return fwc.writer.Write([]byte(res))

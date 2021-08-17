@@ -39,6 +39,10 @@ func (rtr *Router) DELETE(path string, handler Handler) {
 	rtr.addRouteEntry(http.MethodDelete, path, handler)
 }
 
+func (rtr *Router) HandleFunc(method, path string, handler Handler) {
+	rtr.addRouteEntry(method, path, handler)
+}
+
 func (rtr *Router) Routes(path string, fn MethodSetter) {
 	gr := &GroupRoutes{path: rtr.prefixPath + path}
 
