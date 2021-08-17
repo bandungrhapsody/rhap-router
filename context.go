@@ -14,6 +14,10 @@ type Context struct {
 /*
 	Request
 */
+func (fwc *Context) Request() *http.Request {
+	return fwc.request
+}
+
 func (fwc *Context) Query(key string) string {
 	return fwc.request.URL.Query().Get(key)
 }
@@ -29,6 +33,10 @@ func (fwc *Context) Body(v interface{}) error {
 /*
 	ResponseWriter
 */
+func (fwc *Context) ResponseWriter() http.ResponseWriter {
+	return fwc.writer
+}
+
 func (fwc *Context) Header(key string) string {
 	return fwc.writer.Header().Get(key)
 }
@@ -43,6 +51,10 @@ func (fwc *Context) StatusCode(statusCode int) {
 
 func (fwc *Context) SetHeader(key, value string) {
 	fwc.writer.Header().Set(key, value)
+}
+
+func (fwc *Context) SetCookie(cookie *http.Cookie) {
+	http.SetCookie(fwc.writer, cookie)
 }
 
 func (fwc *Context) Write(res string) (int, error) {
