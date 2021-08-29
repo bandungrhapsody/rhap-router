@@ -11,7 +11,7 @@ type RouteEntry struct {
 	HandlerFunc Handler
 }
 
-type Handler func(ctx *Context)
+type Handler func(ctx *Context) error
 
 func (re *RouteEntry) match(r *http.Request) map[string]string {
 	if !isMethodMatches(r, re) {

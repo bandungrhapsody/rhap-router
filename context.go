@@ -11,6 +11,8 @@ type Context struct {
 	statusCode int
 }
 
+type Map map[string]interface{}
+
 /*
 	Request
 */
@@ -30,6 +32,10 @@ func (fwc *Context) Param(key string) string {
 
 func (fwc *Context) Body(v interface{}) error {
 	return json.NewDecoder(fwc.request.Body).Decode(v)
+}
+
+func (fwc *Context) Cookies() []*http.Cookie {
+	return fwc.request.Cookies()
 }
 
 /*

@@ -2,8 +2,6 @@ package rhaprouter
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -58,10 +56,8 @@ func (rtr *Router) Use(m ...Middleware) {
 	rtr.middlewares = append(rtr.middlewares, m...)
 }
 
-func (rtr *Router) Listen(port int) {
-	strPort := fmt.Sprintf(":%d", port)
-
-	log.Fatal(http.ListenAndServe(strPort, rtr))
+func (rtr *Router) Listen(port string) error {
+	return http.ListenAndServe(port, rtr)
 }
 
 func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -77,16 +73,20 @@ func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		c := context.WithValue(ctx.request.Context(), "params", params)
 		ctx.request = ctx.request.WithContext(c)
-		rtr.execute(route, ctx)
+
+		err := rtr.execute(route, ctx)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
 	http.NotFound(w, r)
 }
 
-func (rtr *Router) execute(route RouteEntry, ctx *Context) {
+func (rtr *Router) execute(route RouteEntry, ctx *Context) error {
 	h := applyMiddleware(route.HandlerFunc, rtr.middlewares...)
-	h(ctx)
+	return h(ctx)
 }
 
 func (rtr *Router) addRouteEntry(method, path string, handler Handler) {
