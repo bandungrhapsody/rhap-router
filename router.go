@@ -1,6 +1,7 @@
 package rhaprouter
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -64,34 +65,28 @@ func (rtr *Router) Listen(port int) {
 }
 
 func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := &Context{
+		writer:  w,
+		request: r,
+	}
 	for _, route := range rtr.routes {
 		params := route.match(r)
 		if params == nil {
 			continue
 		}
 
-		rtr.serve(route, &Context{
-			writer:  w,
-			request: r,
-			params:  params,
-		})
+		c := context.WithValue(ctx.request.Context(), "params", params)
+		ctx.request = ctx.request.WithContext(c)
+		rtr.execute(route, ctx)
 		return
 	}
 
 	http.NotFound(w, r)
 }
 
-func (rtr *Router) serve(route RouteEntry, ctx *Context) {
-	if len(rtr.middlewares) < 1 {
-		route.HandlerFunc(ctx)
-		return
-	}
-
-	wrapped := route.HandlerFunc
-	for i := len(rtr.middlewares) - 1; i >= 0; i-- {
-		wrapped = rtr.middlewares[i](wrapped)
-	}
-	wrapped(ctx)
+func (rtr *Router) execute(route RouteEntry, ctx *Context) {
+	h := applyMiddleware(route.HandlerFunc, rtr.middlewares...)
+	h(ctx)
 }
 
 func (rtr *Router) addRouteEntry(method, path string, handler Handler) {
@@ -103,4 +98,11 @@ func (rtr *Router) addRouteEntry(method, path string, handler Handler) {
 		Path: exactPath,
 		HandlerFunc: handler,
 	})
+}
+
+func applyMiddleware(h Handler, middleware ...Middleware) Handler {
+	for i := len(middleware) - 1; i >= 0; i-- {
+		h = middleware[i](h)
+	}
+	return h
 }
