@@ -3,6 +3,7 @@ package rhaprouter
 import (
 	"context"
 	"net/http"
+	"time"
 )
 
 type Router struct {
@@ -62,8 +63,9 @@ func (rtr *Router) Listen(port string) error {
 
 func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := &Context{
-		writer:  w,
-		request: r,
+		writer:      w,
+		request:     r,
+		requestTime: time.Now(),
 	}
 	for _, route := range rtr.routes {
 		params := route.match(r)

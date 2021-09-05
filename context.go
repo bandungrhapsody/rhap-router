@@ -1,14 +1,17 @@
 package rhaprouter
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 type Context struct {
-	writer     http.ResponseWriter
-	request    *http.Request
-	statusCode int
+	writer      http.ResponseWriter
+	request     *http.Request
+	statusCode  int
+	requestTime time.Time
 }
 
 type Map map[string]interface{}
@@ -36,6 +39,20 @@ func (fwc *Context) Body(v interface{}) error {
 
 func (fwc *Context) Cookies() []*http.Cookie {
 	return fwc.request.Cookies()
+}
+
+func (fwc *Context) Cookie(name string) (*http.Cookie, error) {
+	return fwc.request.Cookie(name)
+}
+
+func (fwc *Context) AddContext(key string, value interface{}) {
+	c := context.WithValue(fwc.request.Context(), key, value)
+	fwc.request = fwc.request.WithContext(c)
+}
+
+func (fwc *Context) GetContext(key string) interface{} {
+	ctx := fwc.request.Context()
+	return ctx.Value(key)
 }
 
 /*
@@ -92,4 +109,11 @@ func generateStatusCode(statusCode int) int {
 		return http.StatusOK
 	}
 	return statusCode
+}
+
+/*
+	Additional
+*/
+func (fwc *Context) RequestTime() time.Time {
+	return fwc.requestTime
 }
